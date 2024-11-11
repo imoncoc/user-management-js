@@ -9,19 +9,17 @@ function displayUsers(users) {
   userDataDiv.innerHTML = users
     .map(
       (user) => `
-        <div class="user-div">
-            <h2>User ${user.id}</h2>
-            <p>Name: ${user.name}</p>
-            <p>Email: ${user.email}</p>
-            <button class="edit-btn" onclick="editUser(${user.id})">Edit</button>
-            <button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>
-        </div>
-    `
+      <div>
+          <h2>User ${user.id}</h2>
+          <p>Name: ${user.name}</p>
+          <p>Email: ${user.email}</p>
+          <button class="edit edit-btn" onclick="editUser.call(this, ${user.id})">Edit</button>
+          <button class="delete delete-btn" onclick="deleteUser.call(this, ${user.id})">Delete</button>
+      </div>
+  `
     )
     .join("");
 }
-
-displayUsers(users);
 
 const modal = document.getElementById("modal");
 const openModalBtn = document.getElementById("open-modal-btn");
@@ -45,28 +43,16 @@ window.onclick = function (event) {
   }
 };
 
-addUserForm.onsubmit = function (event) {
-  event.preventDefault();
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const userId = document.getElementById("user-id").value;
-
-  if (userId) {
-    const user = users.find((user) => user.id === parseInt(userId));
-    user.name = name;
-    user.email = email;
-  } else {
-    const newUser = {
-      id: users.length ? users[users.length - 1].id + 1 : 1,
-      name: name,
-      email: email,
-    };
-    users.push(newUser);
-  }
-
+function addUser(name, email) {
+  const newUser = {
+    id: users.length ? users[users.length - 1].id + 1 : 1,
+    name: name,
+    email: email,
+  };
+  users.push(newUser);
   displayUsers(users);
   modal.style.display = "none";
-};
+}
 
 function editUser(userId) {
   const user = users.find((user) => user.id === userId);
@@ -80,3 +66,25 @@ function deleteUser(userId) {
   users = users.filter((user) => user.id !== userId);
   displayUsers(users);
 }
+
+function updateUser(name, email) {
+  const userId = document.getElementById("user-id").value;
+  if (userId) {
+    const user = users.find((user) => user.id === parseInt(userId));
+    user.name = name;
+    user.email = email;
+    displayUsers(users);
+    modal.style.display = "none";
+  } else {
+    addUser.call(this, name, email);
+  }
+}
+
+addUserForm.onsubmit = function (event) {
+  event.preventDefault();
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  updateUser.apply(this, [name, email]);
+};
+
+displayUsers(users);
